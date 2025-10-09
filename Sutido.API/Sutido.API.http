@@ -1,0 +1,6 @@
+@Sutido.API_HostAddress = http://localhost:5258
+
+GET {{Sutido.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
