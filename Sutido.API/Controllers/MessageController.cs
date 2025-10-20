@@ -47,7 +47,7 @@ namespace SutidoWebApplication.Controllers
                 return BadRequest(ModelState);
 
             await _messageService.AddAsync(message);
-            return CreatedAtAction(nameof(GetById), new { id = message.Id }, message);
+            return CreatedAtAction(nameof(GetById), new { id = message.MessageId }, message);
         }
 
         // ==========================
@@ -56,7 +56,7 @@ namespace SutidoWebApplication.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(long id, [FromBody] Message message)
         {
-            if (id != message.Id)
+            if (id != message.MessageId)
                 return BadRequest("ID không khớp.");
 
             var existing = await _messageService.GetByIdAsync(id);

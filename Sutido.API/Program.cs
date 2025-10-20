@@ -44,6 +44,7 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ITrackingRepository, TrackingRepository>();
 builder.Services.AddScoped<ITrackingService, TrackingService>();
 
+builder.Services.AddScoped<PayOSService>();
 
 // Services
 
