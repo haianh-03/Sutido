@@ -63,6 +63,18 @@ public partial class SutidoProjectContext : DbContext
     public virtual DbSet<WalletTransaction> WalletTransactions { get; set; }
 
 
+    public virtual DbSet<Message> Messages { get; set; } = null!;
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // ⚙️ Chuỗi kết nối tạm thời để EF tạo migration (sửa lại tên DB nếu cần)
+            optionsBuilder.UseSqlServer("Server=(local);Database=SutidoProject;User Id=sa;Password=12345;TrustServerCertificate=True");
+        }
+    }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Ad>(entity =>
@@ -522,6 +534,28 @@ public partial class SutidoProjectContext : DbContext
                 .HasForeignKey(d => d.WalletId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__WalletTra__Walle__1CBC4616");
+        });
+
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.MessageId);
+            entity.Property(e => e.Content).HasColumnType("nvarchar(max)");
+            entity.Property(e => e.MessageType).HasMaxLength(50).HasDefaultValue("text");
+            entity.Property(e => e.FileUrl).HasMaxLength(500);
+            entity.Property(e => e.IsRead).HasDefaultValue(false);
+            entity.Property(e => e.SentAt).HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+            entity.HasOne(d => d.ChatRoom)
+                .WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ChatRoomId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Message_ChatRoom");
+
+            entity.HasOne(d => d.Sender)
+                .WithMany()
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Message_User");
         });
 
         OnModelCreatingPartial(modelBuilder);
