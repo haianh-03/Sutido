@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Sutido.Model.Entites;
+using Sutido.Model.Enums;
 
-namespace Sutido.Model;
+namespace Sutido.Model.Data;
 
 public partial class SutidoProjectContext : DbContext
 {
@@ -15,6 +15,26 @@ public partial class SutidoProjectContext : DbContext
         : base(options)
     {
     }
+
+    private string GetConnectionString()
+    {
+        IConfiguration configuration = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json").Build();
+        return configuration["ConnectionStrings:DefaultConnection"];
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            optionsBuilder.UseSqlServer(GetConnectionString());
+        }
+    }
+
+    // =======================
+    // DbSet declarations
+    // =======================
 
     public virtual DbSet<Ad> Ads { get; set; }
 
@@ -40,8 +60,6 @@ public partial class SutidoProjectContext : DbContext
 
     public virtual DbSet<Review> Reviews { get; set; }
 
-    public virtual DbSet<Role> Roles { get; set; }
-
     public virtual DbSet<Subscription> Subscriptions { get; set; }
 
     public virtual DbSet<Tracking> Trackings { get; set; }
@@ -50,7 +68,7 @@ public partial class SutidoProjectContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<Verification> Verifications { get; set; }
+    public virtual DbSet<Certification> Certifications { get; set; }
 
     public virtual DbSet<Voucher> Vouchers { get; set; }
 
@@ -206,10 +224,10 @@ public partial class SutidoProjectContext : DbContext
             entity.ToTable("Point");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.Reason).HasMaxLength(200);
 
-            entity.HasOne(d => d.User).WithMany(p => p.Points)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.User)
+                .WithOne(u => u.Point)
+                .HasForeignKey<Point>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Point__UserId__07C12930");
         });
@@ -302,15 +320,6 @@ public partial class SutidoProjectContext : DbContext
                 .HasConstraintName("FK__Review__ToUserId__75A278F5");
         });
 
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1AD1258896");
-
-            entity.ToTable("Role");
-
-            entity.Property(e => e.RoleName).HasMaxLength(100);
-        });
-
         modelBuilder.Entity<Subscription>(entity =>
         {
             entity.HasKey(e => e.SubscriptionId).HasName("PK__Subscrip__9A2B249DAF80ACF1");
@@ -357,10 +366,18 @@ public partial class SutidoProjectContext : DbContext
             entity.ToTable("TutorProfile");
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
-            entity.Property(e => e.Education).HasMaxLength(500);
+            entity.Property(e => e.Education)
+                .HasConversion<string>()
+                .HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(2000);
+            entity.Property(e => e.status)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .HasDefaultValue(StatusType.Pending);
 
-            entity.HasOne(d => d.User).WithMany(p => p.TutorProfiles)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.User)
+                .WithOne(p => p.TutorProfile)
+                .HasForeignKey<TutorProfile>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__TutorProf__UserI__534D60F1");
         });
@@ -376,38 +393,59 @@ public partial class SutidoProjectContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.FullName).HasMaxLength(200);
+            entity.Property(e => e.Phone).HasMaxLength(50);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
-            entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.Role)
+                .HasConversion<string>()
+                .HasMaxLength(50)
+                .HasDefaultValue(RoleType.Customer);
 
-            entity.HasOne(d => d.Role).WithMany(p => p.Users)
-                .HasForeignKey(d => d.RoleId)
+            entity.HasOne(u => u.TutorProfile)
+                .WithOne(t => t.User)
+                .HasForeignKey<TutorProfile>(t => t.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User__RoleId__3B75D760");
+                .HasConstraintName("FK_TutorProfile_User");
+
+            entity.HasMany(u => u.ReviewedTutorProfiles)
+                .WithOne(t => t.ReviewedByNavigation)
+                .HasForeignKey(t => t.ReviewerBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_TutorProfile_ReviewedBy_User");
+
+            entity.HasMany(u => u.ReviewedCertifications)
+                .WithOne(c => c.ReviewedByNavigation)
+                .HasForeignKey(c => c.ReviewedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Certification_ReviewedBy_User");
         });
 
-        modelBuilder.Entity<Verification>(entity =>
+        modelBuilder.Entity<Certification>(entity =>
         {
-            entity.HasKey(e => e.VerificationId).HasName("PK__Verifica__306D490753D10F80");
+            entity.HasKey(e => e.CertificationId);
 
-            entity.ToTable("Verification");
+            entity.ToTable("Certification");
 
             entity.Property(e => e.DocumentType).HasMaxLength(100);
             entity.Property(e => e.FileUrl).HasMaxLength(500);
             entity.Property(e => e.Note).HasMaxLength(500);
             entity.Property(e => e.Status)
+                .HasConversion<string>()
                 .HasMaxLength(50)
-                .HasDefaultValue("Pending");
+                .HasDefaultValue(StatusType.Pending);
             entity.Property(e => e.SubmittedAt).HasDefaultValueSql("(sysutcdatetime())");
 
-            entity.HasOne(d => d.ReviewedByNavigation).WithMany(p => p.VerificationReviewedByNavigations)
-                .HasForeignKey(d => d.ReviewedBy)
-                .HasConstraintName("FK__Verificat__Revie__4F7CD00D");
+            entity.HasOne(c => c.TutorProfile)
+                .WithMany(t => t.Certifications)
+                .HasForeignKey(c => c.TutorProfileId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Certification_TutorProfile");
 
-            entity.HasOne(d => d.User).WithMany(p => p.VerificationUsers)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Verificat__UserI__4D94879B");
+            entity.HasOne(c => c.ReviewedByNavigation)
+                .WithMany(u => u.ReviewedCertifications)
+                .HasForeignKey(c => c.ReviewedBy)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Certification_ReviewedBy_User");
         });
 
         modelBuilder.Entity<Voucher>(entity =>
@@ -461,8 +499,9 @@ public partial class SutidoProjectContext : DbContext
             entity.Property(e => e.Balance).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Wallets)
-                .HasForeignKey(d => d.UserId)
+            entity.HasOne(d => d.User)
+                .WithOne(p => p.Wallet)
+                .HasForeignKey<Wallet>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Wallet__UserId__4316F928");
         });

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Sutido.Model.Entites;
+﻿namespace Sutido.Model.Entites;
 
 public partial class Subscription
 {

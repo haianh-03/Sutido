@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Sutido.Model.Entites;
+﻿namespace Sutido.Model.Entites;
 
 public partial class Wallet
 {
@@ -9,7 +6,7 @@ public partial class Wallet
 
     public long UserId { get; set; }
 
-    public decimal Balance { get; set; }
+    public decimal Balance { get; set; } = decimal.Zero;
 
     public DateTimeOffset CreatedAt { get; set; }
 
