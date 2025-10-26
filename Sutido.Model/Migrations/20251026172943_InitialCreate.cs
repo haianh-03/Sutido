@@ -31,16 +31,28 @@ namespace Sutido.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Role",
+                name: "User",
                 columns: table => new
                 {
-                    RoleId = table.Column<int>(type: "int", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    DateOfBirth = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Ward = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    District = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    City = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    Role = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Customer"),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())"),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK__Role__8AFACE1AD1258896", x => x.RoleId);
+                    table.PrimaryKey("PK__User__1788CC4CB21C8C24", x => x.UserId);
                 });
 
             migrationBuilder.CreateTable(
@@ -65,31 +77,6 @@ namespace Sutido.Model.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__Voucher__3AEE7921F0C88711", x => x.VoucherId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "User",
-                columns: table => new
-                {
-                    UserId = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
-                    RoleId = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())"),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__User__1788CC4CB21C8C24", x => x.UserId);
-                    table.ForeignKey(
-                        name: "FK__User__RoleId__3B75D760",
-                        column: x => x.RoleId,
-                        principalTable: "Role",
-                        principalColumn: "RoleId");
                 });
 
             migrationBuilder.CreateTable(
@@ -191,10 +178,9 @@ namespace Sutido.Model.Migrations
                 {
                     PointId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Points = table.Column<int>(type: "int", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())")
+                    TotalPoint = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())"),
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -296,48 +282,26 @@ namespace Sutido.Model.Migrations
                     TutorProfileId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Bio = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Education = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ReviewerBy = table.Column<long>(type: "bigint", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    Education = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     ExperienceYears = table.Column<int>(type: "int", nullable: false),
-                    IsApproved = table.Column<bool>(type: "bit", nullable: false),
-                    ApprovedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())")
+                    ReviewedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())"),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Pending"),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__TutorPro__CE969F683A55E287", x => x.TutorProfileId);
                     table.ForeignKey(
-                        name: "FK__TutorProf__UserI__534D60F1",
-                        column: x => x.UserId,
+                        name: "FK_TutorProfile_ReviewedBy_User",
+                        column: x => x.ReviewerBy,
                         principalTable: "User",
-                        principalColumn: "UserId");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Verification",
-                columns: table => new
-                {
-                    VerificationId = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    DocumentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    FileUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    SubmittedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())"),
-                    ReviewedBy = table.Column<long>(type: "bigint", nullable: true),
-                    ReviewedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Pending"),
-                    Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK__Verifica__306D490753D10F80", x => x.VerificationId);
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK__Verificat__Revie__4F7CD00D",
-                        column: x => x.ReviewedBy,
-                        principalTable: "User",
-                        principalColumn: "UserId");
-                    table.ForeignKey(
-                        name: "FK__Verificat__UserI__4D94879B",
+                        name: "FK_TutorProfile_User",
                         column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "UserId");
@@ -439,6 +403,38 @@ namespace Sutido.Model.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Certification",
+                columns: table => new
+                {
+                    CertificationId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TutorProfileId = table.Column<long>(type: "bigint", nullable: false),
+                    DocumentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    FileUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    SubmittedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "(sysutcdatetime())"),
+                    Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    ReviewedBy = table.Column<long>(type: "bigint", nullable: true),
+                    ReviewedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Pending")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Certification", x => x.CertificationId);
+                    table.ForeignKey(
+                        name: "FK_Certification_ReviewedBy_User",
+                        column: x => x.ReviewedBy,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Certification_TutorProfile",
+                        column: x => x.TutorProfileId,
+                        principalTable: "TutorProfile",
+                        principalColumn: "TutorProfileId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WalletExternalTransaction",
                 columns: table => new
                 {
@@ -533,6 +529,37 @@ namespace Sutido.Model.Migrations
                         column: x => x.ChatRoomId,
                         principalTable: "ChatRoom",
                         principalColumn: "ChatRoomId");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    MessageId = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ChatRoomId = table.Column<long>(type: "bigint", nullable: false),
+                    SenderId = table.Column<long>(type: "bigint", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MessageType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "text"),
+                    FileUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    SentAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false, defaultValueSql: "SYSDATETIMEOFFSET()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.MessageId);
+                    table.ForeignKey(
+                        name: "FK_Message_ChatRoom",
+                        column: x => x.ChatRoomId,
+                        principalTable: "ChatRoom",
+                        principalColumn: "ChatRoomId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Message_User",
+                        column: x => x.SenderId,
+                        principalTable: "User",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -643,6 +670,16 @@ namespace Sutido.Model.Migrations
                 column: "ChatRoomId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Certification_ReviewedBy",
+                table: "Certification",
+                column: "ReviewedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Certification_TutorProfileId",
+                table: "Certification",
+                column: "TutorProfileId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ChatRoom_ParentPostId",
                 table: "ChatRoom",
                 column: "ParentPostId");
@@ -673,9 +710,20 @@ namespace Sutido.Model.Migrations
                 column: "SellerUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_ChatRoomId",
+                table: "Messages",
+                column: "ChatRoomId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Point_UserId",
                 table: "Point",
-                column: "UserId");
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PointTransaction_PointId",
@@ -733,30 +781,21 @@ namespace Sutido.Model.Migrations
                 column: "TutorUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TutorProfile_UserId",
+                name: "IX_TutorProfile_ReviewerBy",
                 table: "TutorProfile",
-                column: "UserId");
+                column: "ReviewerBy");
 
             migrationBuilder.CreateIndex(
-                name: "IX_User_RoleId",
-                table: "User",
-                column: "RoleId");
+                name: "IX_TutorProfile_UserId",
+                table: "TutorProfile",
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "UQ__User__A9D105349C379654",
                 table: "User",
                 column: "Email",
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Verification_ReviewedBy",
-                table: "Verification",
-                column: "ReviewedBy");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Verification_UserId",
-                table: "Verification",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "UQ__Voucher__A25C5AA7899263F3",
@@ -782,7 +821,8 @@ namespace Sutido.Model.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Wallet_UserId",
                 table: "Wallet",
-                column: "UserId");
+                column: "UserId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_WalletExternalTransaction_BankAccountId",
@@ -820,10 +860,16 @@ namespace Sutido.Model.Migrations
                 name: "AuditLog");
 
             migrationBuilder.DropTable(
+                name: "Certification");
+
+            migrationBuilder.DropTable(
                 name: "Document");
 
             migrationBuilder.DropTable(
                 name: "MarketplaceItem");
+
+            migrationBuilder.DropTable(
+                name: "Messages");
 
             migrationBuilder.DropTable(
                 name: "PointTransaction");
@@ -838,16 +884,13 @@ namespace Sutido.Model.Migrations
                 name: "Tracking");
 
             migrationBuilder.DropTable(
-                name: "TutorProfile");
-
-            migrationBuilder.DropTable(
-                name: "Verification");
-
-            migrationBuilder.DropTable(
                 name: "VoucherUsage");
 
             migrationBuilder.DropTable(
                 name: "WalletExternalTransaction");
+
+            migrationBuilder.DropTable(
+                name: "TutorProfile");
 
             migrationBuilder.DropTable(
                 name: "Point");
@@ -878,9 +921,6 @@ namespace Sutido.Model.Migrations
 
             migrationBuilder.DropTable(
                 name: "User");
-
-            migrationBuilder.DropTable(
-                name: "Role");
         }
     }
 }

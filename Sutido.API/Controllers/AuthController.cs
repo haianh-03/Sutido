@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Sutido.API.ViewModels.Requests;
 using Sutido.Model.Entites;
-using Sutido.Service.Implementations;
 using Sutido.Service.Interfaces;
 
 namespace Sutido.API.Controllers

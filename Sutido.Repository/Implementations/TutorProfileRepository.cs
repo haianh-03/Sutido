@@ -23,7 +23,7 @@ namespace Sutido.Repository.Implementations
                 if (profile != null)
                 {
                     profile.Certifications = profile.Certifications
-                        .Where(c => c.Status == profile.status)
+                        .Where(c => c.Status == profile.Status)
                         .ToList();
                 }
 
@@ -55,7 +55,7 @@ namespace Sutido.Repository.Implementations
             {
                 return await _context.TutorProfiles
                     .Include(t => t.Certifications.Where(c => c.Status == status))
-                    .Where(t => t.status == status)
+                    .Where(t => t.Status == status)
                     .SingleOrDefaultAsync(t => t.TutorProfileId == id);
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace Sutido.Repository.Implementations
                 foreach (var t in result)
                 {
                     t.Certifications = t.Certifications
-                        .Where(c => c.Status == t.status)
+                        .Where(c => c.Status == t.Status)
                         .ToList();
                 }
                 return result;

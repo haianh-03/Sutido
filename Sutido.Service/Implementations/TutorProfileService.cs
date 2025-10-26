@@ -72,13 +72,13 @@ namespace Sutido.Service.Implementations
             }
             else
             {
-                if (existingProfile.status == StatusType.Suspended) throw new Exception("tutor profile has been banned.");
+                if (existingProfile.Status == StatusType.Suspended) throw new Exception("tutor profile has been banned.");
 
                 existingProfile.Description = profile.Description;
                 existingProfile.Education = profile.Education;
                 existingProfile.ExperienceYears = profile.ExperienceYears;
                 existingProfile.CreatedAt = DateTimeOffset.UtcNow;
-                existingProfile.status = StatusType.Pending;
+                existingProfile.Status = StatusType.Pending;
                 existingProfile.Reason = null;
                 existingProfile.Certifications = certifications;
                 existingProfile.ReviewedAt = null;
@@ -121,7 +121,7 @@ namespace Sutido.Service.Implementations
 
             if (profile == null) return null;
 
-            if(profile.status != StatusType.Approved) return null;
+            if(profile.Status != StatusType.Approved) return null;
 
             foreach (var cert in profile.Certifications)
             {
@@ -155,9 +155,9 @@ namespace Sutido.Service.Implementations
 
             profile.ReviewerBy = t.ReviewerBy;
             profile.ReviewedAt = DateTimeOffset.UtcNow;
-            profile.status = t.status;
+            profile.Status = t.Status;
 
-            switch (t.status)
+            switch (t.Status)
             {
                 case StatusType.Approved:
                     {

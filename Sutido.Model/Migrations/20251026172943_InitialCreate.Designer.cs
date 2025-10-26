@@ -12,8 +12,8 @@ using Sutido.Model.Data;
 namespace Sutido.Model.Migrations
 {
     [DbContext(typeof(SutidoProjectContext))]
-    [Migration("20251009075606_UpdateAddressFields")]
-    partial class UpdateAddressFields
+    [Migration("20251026172943_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -208,6 +208,58 @@ namespace Sutido.Model.Migrations
                     b.ToTable("Booking", (string)null);
                 });
 
+            modelBuilder.Entity("Sutido.Model.Entites.Certification", b =>
+                {
+                    b.Property<long>("CertificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("CertificationId"));
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FileUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("ReviewedBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<DateTimeOffset>("SubmittedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("(sysutcdatetime())");
+
+                    b.Property<long>("TutorProfileId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("CertificationId");
+
+                    b.HasIndex("ReviewedBy");
+
+                    b.HasIndex("TutorProfileId");
+
+                    b.ToTable("Certification", (string)null);
+                });
+
             modelBuilder.Entity("Sutido.Model.Entites.ChatRoom", b =>
                 {
                     b.Property<long>("ChatRoomId")
@@ -372,6 +424,53 @@ namespace Sutido.Model.Migrations
                     b.ToTable("MarketplaceItem", (string)null);
                 });
 
+            modelBuilder.Entity("Sutido.Model.Entites.Message", b =>
+                {
+                    b.Property<long>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("MessageId"));
+
+                    b.Property<long>("ChatRoomId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("text");
+
+                    b.Property<long>("SenderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("Sutido.Model.Entites.Point", b =>
                 {
                     b.Property<long>("PointId")
@@ -385,12 +484,8 @@ namespace Sutido.Model.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("(sysutcdatetime())");
 
-                    b.Property<int>("Points")
+                    b.Property<int>("TotalPoint")
                         .HasColumnType("int");
-
-                    b.Property<string>("Reason")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -398,7 +493,8 @@ namespace Sutido.Model.Migrations
                     b.HasKey("PointId")
                         .HasName("PK__Point__40A977E16D9C2789");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Point", (string)null);
                 });
@@ -593,25 +689,6 @@ namespace Sutido.Model.Migrations
                     b.ToTable("Review", (string)null);
                 });
 
-            modelBuilder.Entity("Sutido.Model.Entites.Role", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
-
-                    b.Property<string>("RoleName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("RoleId")
-                        .HasName("PK__Role__8AFACE1AD1258896");
-
-                    b.ToTable("Role", (string)null);
-                });
-
             modelBuilder.Entity("Sutido.Model.Entites.Subscription", b =>
                 {
                     b.Property<long>("SubscriptionId")
@@ -705,26 +782,38 @@ namespace Sutido.Model.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("TutorProfileId"));
 
-                    b.Property<DateTimeOffset?>("ApprovedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Bio")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTimeOffset>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("(sysutcdatetime())");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
                     b.Property<string>("Education")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("ExperienceYears")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("bit");
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("ReviewedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<long?>("ReviewerBy")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Pending");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
@@ -732,7 +821,10 @@ namespace Sutido.Model.Migrations
                     b.HasKey("TutorProfileId")
                         .HasName("PK__TutorPro__CE969F683A55E287");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ReviewerBy");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("TutorProfile", (string)null);
                 });
@@ -752,6 +844,9 @@ namespace Sutido.Model.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("(sysutcdatetime())");
+
+                    b.Property<DateTimeOffset>("DateOfBirth")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("District")
                         .HasColumnType("nvarchar(max)");
@@ -780,8 +875,12 @@ namespace Sutido.Model.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Customer");
 
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
@@ -795,65 +894,10 @@ namespace Sutido.Model.Migrations
                     b.HasKey("UserId")
                         .HasName("PK__User__1788CC4CB21C8C24");
 
-                    b.HasIndex("RoleId");
-
                     b.HasIndex(new[] { "Email" }, "UQ__User__A9D105349C379654")
                         .IsUnique();
 
                     b.ToTable("User", (string)null);
-                });
-
-            modelBuilder.Entity("Sutido.Model.Entites.Verification", b =>
-                {
-                    b.Property<long>("VerificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("VerificationId"));
-
-                    b.Property<string>("DocumentType")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("FileUrl")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset?>("ReviewedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<long?>("ReviewedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasDefaultValue("Pending");
-
-                    b.Property<DateTimeOffset>("SubmittedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetimeoffset")
-                        .HasDefaultValueSql("(sysutcdatetime())");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("VerificationId")
-                        .HasName("PK__Verifica__306D490753D10F80");
-
-                    b.HasIndex("ReviewedBy");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Verification", (string)null);
                 });
 
             modelBuilder.Entity("Sutido.Model.Entites.Voucher", b =>
@@ -974,7 +1018,8 @@ namespace Sutido.Model.Migrations
                     b.HasKey("WalletId")
                         .HasName("PK__Wallet__84D4F90E94E5E2C5");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Wallet", (string)null);
                 });
@@ -1133,6 +1178,26 @@ namespace Sutido.Model.Migrations
                     b.Navigation("ChatRoom");
                 });
 
+            modelBuilder.Entity("Sutido.Model.Entites.Certification", b =>
+                {
+                    b.HasOne("Sutido.Model.Entites.User", "ReviewedByNavigation")
+                        .WithMany("ReviewedCertifications")
+                        .HasForeignKey("ReviewedBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Certification_ReviewedBy_User");
+
+                    b.HasOne("Sutido.Model.Entites.TutorProfile", "TutorProfile")
+                        .WithMany("Certifications")
+                        .HasForeignKey("TutorProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Certification_TutorProfile");
+
+                    b.Navigation("ReviewedByNavigation");
+
+                    b.Navigation("TutorProfile");
+                });
+
             modelBuilder.Entity("Sutido.Model.Entites.ChatRoom", b =>
                 {
                     b.HasOne("Sutido.Model.Entites.Post", "ParentPost")
@@ -1190,11 +1255,32 @@ namespace Sutido.Model.Migrations
                     b.Navigation("SellerUser");
                 });
 
+            modelBuilder.Entity("Sutido.Model.Entites.Message", b =>
+                {
+                    b.HasOne("Sutido.Model.Entites.ChatRoom", "ChatRoom")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_ChatRoom");
+
+                    b.HasOne("Sutido.Model.Entites.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_User");
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Sutido.Model.Entites.Point", b =>
                 {
                     b.HasOne("Sutido.Model.Entites.User", "User")
-                        .WithMany("Points")
-                        .HasForeignKey("UserId")
+                        .WithOne("Point")
+                        .HasForeignKey("Sutido.Model.Entites.Point", "UserId")
                         .IsRequired()
                         .HasConstraintName("FK__Point__UserId__07C12930");
 
@@ -1307,38 +1393,17 @@ namespace Sutido.Model.Migrations
 
             modelBuilder.Entity("Sutido.Model.Entites.TutorProfile", b =>
                 {
-                    b.HasOne("Sutido.Model.Entites.User", "User")
-                        .WithMany("TutorProfiles")
-                        .HasForeignKey("UserId")
-                        .IsRequired()
-                        .HasConstraintName("FK__TutorProf__UserI__534D60F1");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Sutido.Model.Entites.User", b =>
-                {
-                    b.HasOne("Sutido.Model.Entites.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .IsRequired()
-                        .HasConstraintName("FK__User__RoleId__3B75D760");
-
-                    b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("Sutido.Model.Entites.Verification", b =>
-                {
                     b.HasOne("Sutido.Model.Entites.User", "ReviewedByNavigation")
-                        .WithMany("VerificationReviewedByNavigations")
-                        .HasForeignKey("ReviewedBy")
-                        .HasConstraintName("FK__Verificat__Revie__4F7CD00D");
+                        .WithMany("ReviewedTutorProfiles")
+                        .HasForeignKey("ReviewerBy")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_TutorProfile_ReviewedBy_User");
 
                     b.HasOne("Sutido.Model.Entites.User", "User")
-                        .WithMany("VerificationUsers")
-                        .HasForeignKey("UserId")
+                        .WithOne("TutorProfile")
+                        .HasForeignKey("Sutido.Model.Entites.TutorProfile", "UserId")
                         .IsRequired()
-                        .HasConstraintName("FK__Verificat__UserI__4D94879B");
+                        .HasConstraintName("FK_TutorProfile_User");
 
                     b.Navigation("ReviewedByNavigation");
 
@@ -1375,8 +1440,8 @@ namespace Sutido.Model.Migrations
             modelBuilder.Entity("Sutido.Model.Entites.Wallet", b =>
                 {
                     b.HasOne("Sutido.Model.Entites.User", "User")
-                        .WithMany("Wallets")
-                        .HasForeignKey("UserId")
+                        .WithOne("Wallet")
+                        .HasForeignKey("Sutido.Model.Entites.Wallet", "UserId")
                         .IsRequired()
                         .HasConstraintName("FK__Wallet__UserId__4316F928");
 
@@ -1442,6 +1507,8 @@ namespace Sutido.Model.Migrations
             modelBuilder.Entity("Sutido.Model.Entites.ChatRoom", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Sutido.Model.Entites.Point", b =>
@@ -1461,9 +1528,9 @@ namespace Sutido.Model.Migrations
                     b.Navigation("PointTransactions");
                 });
 
-            modelBuilder.Entity("Sutido.Model.Entites.Role", b =>
+            modelBuilder.Entity("Sutido.Model.Entites.TutorProfile", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("Certifications");
                 });
 
             modelBuilder.Entity("Sutido.Model.Entites.User", b =>
@@ -1480,7 +1547,8 @@ namespace Sutido.Model.Migrations
 
                     b.Navigation("MarketplaceItems");
 
-                    b.Navigation("Points");
+                    b.Navigation("Point")
+                        .IsRequired();
 
                     b.Navigation("Posts");
 
@@ -1492,23 +1560,24 @@ namespace Sutido.Model.Migrations
 
                     b.Navigation("ReviewToUsers");
 
+                    b.Navigation("ReviewedCertifications");
+
+                    b.Navigation("ReviewedTutorProfiles");
+
                     b.Navigation("Subscriptions");
 
                     b.Navigation("Trackings");
 
-                    b.Navigation("TutorProfiles");
-
-                    b.Navigation("VerificationReviewedByNavigations");
-
-                    b.Navigation("VerificationUsers");
+                    b.Navigation("TutorProfile");
 
                     b.Navigation("VoucherUsages");
+
+                    b.Navigation("Wallet")
+                        .IsRequired();
 
                     b.Navigation("WalletTransactionFromUsers");
 
                     b.Navigation("WalletTransactionToUsers");
-
-                    b.Navigation("Wallets");
                 });
 
             modelBuilder.Entity("Sutido.Model.Entites.Voucher", b =>

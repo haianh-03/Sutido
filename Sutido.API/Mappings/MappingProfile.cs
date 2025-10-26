@@ -27,7 +27,7 @@ namespace Sutido.Service.Mappings
             CreateMap<TutorProfileRequest, TutorProfile>();
             //==Response==
             CreateMap<TutorProfile, TutorProfileResponse>()
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.status)) // khác tên
+                //.ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status)) // khác tên
                 .ForMember(dest => dest.Certifications, opt => opt.MapFrom(src => src.Certifications));
 
             // Certification

@@ -20,7 +20,7 @@ public partial class TutorProfile
 
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-    public StatusType status { get; set; } = StatusType.Pending;
+    public StatusType Status { get; set; } = StatusType.Pending;
 
     public string? Reason { get; set; }
 

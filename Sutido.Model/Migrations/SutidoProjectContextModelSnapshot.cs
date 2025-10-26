@@ -421,6 +421,53 @@ namespace Sutido.Model.Migrations
                     b.ToTable("MarketplaceItem", (string)null);
                 });
 
+            modelBuilder.Entity("Sutido.Model.Entites.Message", b =>
+                {
+                    b.Property<long>("MessageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("MessageId"));
+
+                    b.Property<long>("ChatRoomId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("text");
+
+                    b.Property<long>("SenderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.HasKey("MessageId");
+
+                    b.HasIndex("ChatRoomId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("Sutido.Model.Entites.Point", b =>
                 {
                     b.Property<long>("PointId")
@@ -758,15 +805,15 @@ namespace Sutido.Model.Migrations
                     b.Property<long?>("ReviewerBy")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("status")
+                    b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasDefaultValue("Pending");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("TutorProfileId")
                         .HasName("PK__TutorPro__CE969F683A55E287");
@@ -1205,6 +1252,27 @@ namespace Sutido.Model.Migrations
                     b.Navigation("SellerUser");
                 });
 
+            modelBuilder.Entity("Sutido.Model.Entites.Message", b =>
+                {
+                    b.HasOne("Sutido.Model.Entites.ChatRoom", "ChatRoom")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChatRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_ChatRoom");
+
+                    b.HasOne("Sutido.Model.Entites.User", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_User");
+
+                    b.Navigation("ChatRoom");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("Sutido.Model.Entites.Point", b =>
                 {
                     b.HasOne("Sutido.Model.Entites.User", "User")
@@ -1436,6 +1504,8 @@ namespace Sutido.Model.Migrations
             modelBuilder.Entity("Sutido.Model.Entites.ChatRoom", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Sutido.Model.Entites.Point", b =>

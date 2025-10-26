@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="15.0.1" />
+    <PackageReference Include="payOS" Version="1.0.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sutido.Model\Sutido.Model.csproj" />
+    <ProjectReference Include="..\Sutido.Repository\Sutido.Repository.csproj" />
     <ProjectReference Include="..\Sutido.Model\Sutido.Model.csproj" />
     <ProjectReference Include="..\Sutido.Repository\Sutido.Repository.csproj" />
     <ProjectReference Include="..\ViewModels\ViewModels.csproj" />

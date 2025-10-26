@@ -22,7 +22,7 @@ namespace Sutido.Service.Implementations
         {
             var profile = await _iUnitOfWork.TutorProfiles.GetByIdAsync(id);
             if (profile == null) return null;
-            var certs = await _iUnitOfWork.Certifications.GetAllByTutorProfileIdAsync(id, profile.status);
+            var certs = await _iUnitOfWork.Certifications.GetAllByTutorProfileIdAsync(id, profile.Status);
 
             foreach (var cert in certs)
             {
@@ -41,7 +41,7 @@ namespace Sutido.Service.Implementations
             var profile = await _iUnitOfWork.TutorProfiles.GetByIdAsync(tutorProfileId);
             if (profile == null) throw new Exception("Tutor profile is not exist.");
 
-            if (profile.status != StatusType.Approved) throw new Exception("Invalid tutor profile.");
+            if (profile.Status != StatusType.Approved) throw new Exception("Invalid tutor profile.");
 
             if (file == null || file.Length == 0)
                 throw new Exception("Invalid file.");
