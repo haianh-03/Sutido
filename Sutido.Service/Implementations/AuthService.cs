@@ -11,10 +11,12 @@ namespace Sutido.Service.Implementations
     public class AuthService : IAuthService
     {
         private readonly IUnitOfWork _iRepo;
+        private readonly IJwtService _jwtService; // ⬅️ Thêm
 
-        public AuthService(IUnitOfWork iRepo)
+        public AuthService(IUnitOfWork iRepo, IJwtService jwtService) // ⬅️ Sửa
         {
             _iRepo = iRepo;
+            _jwtService = jwtService; // ⬅️ Thêm
         }
 
         public async Task<AuthResponse> RegisterAsync(User u)
@@ -30,13 +32,16 @@ namespace Sutido.Service.Implementations
             await _iRepo.Users.AddAsync(u);
             await _iRepo.SaveAsync();
 
+            // ✅ Tạo Token sau khi đăng ký
+            var token = _jwtService.GenerateToken(u);
+
             return new AuthResponse
             {
                 UserId = u.UserId,
                 FullName = u.FullName,
                 Email = u.Email,
                 Role = u.Role,
-                //Token = token
+                Token = token // ⬅️ Gán token
             };
         }
 
@@ -52,11 +57,14 @@ namespace Sutido.Service.Implementations
                 user = await _iRepo.Users.FindUserByPhoneAsync(request.Identifier, true);
             }
             if (user == null)
-                throw new Exception("Invalid email or password.");
+                throw new Exception("Invalid email or phone.");
 
             bool isValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
             if (!isValid)
-                throw new Exception("Invalid email or password.");
+                throw new Exception("Invalid password.");
+
+            // ✅ Tạo Token sau khi đăng nhập
+            var token = _jwtService.GenerateToken(user);
 
             return new AuthResponse
             {
@@ -64,7 +72,7 @@ namespace Sutido.Service.Implementations
                 FullName = user.FullName,
                 Email = user.Email,
                 Role = user.Role,
-                //Token = token
+                Token = token // ⬅️ Gán token
             };
         }
     }

@@ -1,10 +1,7 @@
-﻿using Sutido.Model;
-using Sutido.Model.Entites;
+﻿using Sutido.Model.Entites;
 using Sutido.Repository.Interfaces;
 using Sutido.Repository.UnitOfWork;
 using Sutido.Service.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Sutido.Service.Implementations
 {
@@ -19,8 +16,11 @@ namespace Sutido.Service.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<Tracking>> GetAllAsync() => await _repository.GetAllAsync();
-        public async Task<Tracking> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
+        public async Task<Tracking?> GetByIdAsync(long id) => // <-- Sửa sang long
+            await _repository.GetByIdAsync(id);
+
+        public async Task<IEnumerable<Tracking>> GetByBookingIdAsync(long bookingId) =>
+            await _repository.GetByBookingIdAsync(bookingId);
 
         public async Task AddAsync(Tracking entity)
         {
@@ -28,20 +28,6 @@ namespace Sutido.Service.Implementations
             await _unitOfWork.SaveAsync();
         }
 
-        public async Task UpdateAsync(Tracking entity)
-        {
-            _repository.Update(entity);
-            await _unitOfWork.SaveAsync();
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var entity = await _repository.GetByIdAsync(id);
-            if (entity != null)
-            {
-                _repository.Delete(entity);
-                await _unitOfWork.SaveAsync();
-            }
-        }
+        // ❌ Xóa UpdateAsync và DeleteAsync
     }
 }

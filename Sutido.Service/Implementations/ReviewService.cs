@@ -1,4 +1,4 @@
-﻿using Sutido.Model;
+﻿// Sutido.Service.Implementations.ReviewService
 using Sutido.Model.Entites;
 using Sutido.Repository.Interfaces;
 using Sutido.Repository.UnitOfWork;
@@ -19,8 +19,14 @@ namespace Sutido.Service.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<Review>> GetAllAsync() => await _repository.GetAllAsync();
-        public async Task<Review> GetByIdAsync(int id) => await _repository.GetByIdAsync(id);
+        public async Task<IEnumerable<Review>> GetAllAsync() =>
+            await _repository.GetAllAsync();
+
+        public async Task<Review?> GetByIdAsync(long id) => // <-- Sửa từ int
+            await _repository.GetByIdAsync(id);
+
+        public async Task<IEnumerable<Review>> GetReviewsForUserAsync(long userId) =>
+            await _repository.GetReviewsForUserAsync(userId);
 
         public async Task AddAsync(Review entity)
         {
@@ -34,14 +40,11 @@ namespace Sutido.Service.Implementations
             await _unitOfWork.SaveAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        // ✅ Sửa: Hiệu quả hơn, tránh 2 lần fetch
+        public async Task DeleteAsync(Review entity)
         {
-            var entity = await _repository.GetByIdAsync(id);
-            if (entity != null)
-            {
-                _repository.Delete(entity);
-                await _unitOfWork.SaveAsync();
-            }
+            _repository.Delete(entity);
+            await _unitOfWork.SaveAsync();
         }
     }
 }

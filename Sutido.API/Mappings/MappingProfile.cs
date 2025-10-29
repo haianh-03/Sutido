@@ -36,6 +36,13 @@ namespace Sutido.Service.Mappings
             CreateMap<CertificationReviewRequest, Certification>();
             //==Response==
             CreateMap<Certification, CertificationResponse>();
+
+            // Booking
+            CreateMap<BookingRequest, Booking>()
+                .ForMember(dest => dest.BookingStatus, opt => opt.MapFrom(src => "Pending"))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTimeOffset.UtcNow));
+
+            CreateMap<Booking, BookingResponse>();
         }
     }
 }

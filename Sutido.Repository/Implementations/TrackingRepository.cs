@@ -14,19 +14,25 @@ namespace Sutido.Repository.Implementations
             _context = context;
         }
 
-        public async Task<IEnumerable<Tracking>> GetAllAsync() =>
-            await _context.Trackings.ToListAsync();
+        // ✅ Sửa: GetById (long) và .Include()
+        public async Task<Tracking?> GetByIdAsync(long id) => // <-- Sửa sang long
+            await _context.Trackings
+                .Include(t => t.TutorUser) // Tải kèm user
+                .FirstOrDefaultAsync(t => t.TrackingId == id);
 
-        public async Task<Tracking> GetByIdAsync(int id) =>
-            await _context.Trackings.FindAsync(id);
+        // ✅ Thêm mới: GetByBookingId
+        public async Task<IEnumerable<Tracking>> GetByBookingIdAsync(long bookingId) =>
+            await _context.Trackings
+                .Where(t => t.BookingId == bookingId)
+                .Include(t => t.TutorUser) // Tải kèm user
+                .OrderBy(t => t.ActionAt) // Sắp xếp theo thời gian
+                .ToListAsync();
 
-        public async Task AddAsync(Tracking entity) =>
+        public async Task AddAsync(Tracking entity)
+        {
             await _context.Trackings.AddAsync(entity);
+        }
 
-        public void Update(Tracking entity) =>
-            _context.Trackings.Update(entity);
-
-        public void Delete(Tracking entity) =>
-            _context.Trackings.Remove(entity);
+        // ❌ Xóa GetAll, Update, Delete
     }
 }

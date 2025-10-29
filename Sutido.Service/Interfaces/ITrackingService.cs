@@ -1,16 +1,15 @@
-﻿using Sutido.Model;
-using Sutido.Model.Entites;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Sutido.Model.Entites;
 
 namespace Sutido.Service.Interfaces
 {
     public interface ITrackingService
     {
-        Task<IEnumerable<Tracking>> GetAllAsync();
-        Task<Tracking> GetByIdAsync(int id);
+        Task<Tracking?> GetByIdAsync(long id); // <-- Sửa sang long
         Task AddAsync(Tracking entity);
-        Task UpdateAsync(Tracking entity);
-        Task DeleteAsync(int id);
+        Task<IEnumerable<Tracking>> GetByBookingIdAsync(long bookingId);
+
+        // ❌ Bỏ UpdateAsync và DeleteAsync
+        // Task UpdateAsync(Tracking entity);
+        // Task DeleteAsync(long id);
     }
 }

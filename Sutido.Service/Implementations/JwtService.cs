@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using Sutido.Model.Entites;
 using Sutido.Service.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using System.Security.Claims; // ⬅️ Thêm
 using System.Text;
 
 namespace Sutido.Service.Implementations
@@ -25,10 +25,12 @@ namespace Sutido.Service.Implementations
 
             var claims = new List<Claim>
             {
+                // ✅ Sửa: Dùng ClaimTypes tiêu chuẩn
                 new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim("userId", user.UserId.ToString()),
-                new Claim("fullName", user.FullName),
-                new Claim("role", user.Role.ToString())
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()), // ⬅️ Quan trọng nhất
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Role, user.Role.ToString()) // ⬅️ Quan trọng
             };
 
             var token = new JwtSecurityToken(

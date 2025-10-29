@@ -63,6 +63,7 @@ builder.Services.AddScoped<IChatRoomService, ChatRoomService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<ITrackingService, TrackingService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddAutoMapper(cfg =>
 {

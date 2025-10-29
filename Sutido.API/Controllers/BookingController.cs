@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using Sutido.API.ViewModels.Requests;
+using Sutido.API.ViewModels.Responses;
 using Sutido.Model.Entites;
 using Sutido.Service.Interfaces;
 
@@ -9,36 +12,52 @@ namespace Sutido.API.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingService _bookingService;
+        private readonly IMapper _mapper;
 
-        public BookingController(IBookingService bookingService)
+        public BookingController(IBookingService bookingService, IMapper mapper)
         {
             _bookingService = bookingService;
+            _mapper = mapper;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() =>
-            Ok(await _bookingService.GetAllAsync());
+        public async Task<IActionResult> GetAll()
+        {
+            var bookings = await _bookingService.GetAllAsync();
+            var responses = _mapper.Map<IEnumerable<BookingResponse>>(bookings);
+            return Ok(responses);
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(long id)
         {
             var booking = await _bookingService.GetByIdAsync(id);
-            return booking == null ? NotFound() : Ok(booking);
+            if (booking == null) return NotFound();
+            return Ok(_mapper.Map<BookingResponse>(booking));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Booking booking)
+        public async Task<IActionResult> Create([FromBody] BookingRequest request)
         {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var booking = _mapper.Map<Booking>(request);
             await _bookingService.CreateAsync(booking);
-            return Ok();
+
+            var response = _mapper.Map<BookingResponse>(booking);
+            return Ok(response);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, Booking booking)
+        public async Task<IActionResult> Update(long id, [FromBody] BookingRequest request)
         {
-            if (id != booking.BookingId) return BadRequest();
-            await _bookingService.UpdateAsync(booking);
-            return Ok();
+            var existing = await _bookingService.GetByIdAsync(id);
+            if (existing == null) return NotFound();
+
+            _mapper.Map(request, existing);
+            await _bookingService.UpdateAsync(existing);
+
+            return Ok(_mapper.Map<BookingResponse>(existing));
         }
 
         [HttpDelete("{id}")]

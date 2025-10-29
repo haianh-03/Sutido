@@ -8,6 +8,6 @@ namespace ViewModels.Responses
         public string FullName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public RoleType Role { get; set; }
-        //public string Token { get; set; } = null!;
+        public string Token { get; set; } = null!; // ⬅️ Bỏ dấu comment
     }
 }

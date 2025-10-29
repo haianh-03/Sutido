@@ -1,104 +1,106 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Sutido.API.ViewModels.Requests;
+using Sutido.API.ViewModels.Responses;
 using Sutido.Model.Entites;
 using Sutido.Service.Interfaces;
+using System.Security.Claims; // Cần để lấy User ID
 
 namespace SutidoWebApplication.Controllers
 {
+    [Authorize] // 🔒 BẮT BUỘC: Tất cả API chat phải yêu cầu đăng nhập
     [ApiController]
     [Route("api/[controller]")]
     public class MessageController : ControllerBase
     {
         private readonly IMessageService _messageService;
+        private readonly IMapper _mapper;
+        // Thêm các service để lưu file và broadcast SignalR
+        // private readonly IFileStorageService _fileService; 
+        // private readonly IHubContext<ChatHub> _chatHubContext;
 
-        public MessageController(IMessageService messageService)
+        public MessageController(IMessageService messageService, IMapper mapper)
         {
             _messageService = messageService;
+            _mapper = mapper;
         }
 
-        // ==========================
-        // 📘 1️⃣ Lấy tất cả tin nhắn
-        // ==========================
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var messages = await _messageService.GetAllAsync();
-            return Ok(messages);
-        }
-
-        // ==========================
-        // 📘 2️⃣ Lấy tin nhắn theo ID
-        // ==========================
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(long id)
-        {
-            var message = await _messageService.GetByIdAsync(id);
-            if (message == null)
-                return NotFound($"Không tìm thấy tin nhắn có ID = {id}");
-            return Ok(message);
-        }
-
-        // ==========================
-        // ✉️ 3️⃣ Thêm tin nhắn mới
-        // ==========================
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Message message)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            await _messageService.AddAsync(message);
-            return CreatedAtAction(nameof(GetById), new { id = message.MessageId }, message);
-        }
-
-        // ==========================
-        // 🛠️ 4️⃣ Cập nhật tin nhắn
-        // ==========================
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(long id, [FromBody] Message message)
-        {
-            if (id != message.MessageId)
-                return BadRequest("ID không khớp.");
-
-            var existing = await _messageService.GetByIdAsync(id);
-            if (existing == null)
-                return NotFound($"Không tìm thấy tin nhắn có ID = {id}");
-
-            _messageService.Update(message);
-            return NoContent();
-        }
-
-        // ==========================
-        // ❌ 5️⃣ Xóa tin nhắn
-        // ==========================
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(long id)
-        {
-            var existing = await _messageService.GetByIdAsync(id);
-            if (existing == null)
-                return NotFound($"Không tìm thấy tin nhắn có ID = {id}");
-
-            _messageService.Delete(existing);
-            return NoContent();
-        }
-
-        // ==========================
-        // 💬 6️⃣ Lấy tin nhắn theo ChatRoom
-        // ==========================
+        // ===================================
+        // 💬 1. Lấy lịch sử tin nhắn
+        // ===================================
         [HttpGet("chatroom/{chatRoomId}")]
         public async Task<IActionResult> GetMessagesByChatRoomId(long chatRoomId)
         {
+            // TODO: Kiểm tra xem user hiện tại có phải là thành viên
+            // của chatRoomId này không, nếu không thì trả về 403 Forbidden.
+
             var messages = await _messageService.GetMessagesByChatRoomIdAsync(chatRoomId);
-            return Ok(messages);
+
+            // Map sang Response DTO
+            var response = _mapper.Map<IEnumerable<MessageResponse>>(messages);
+
+            return Ok(response);
         }
 
-        // ==========================
-        // 💬 7️⃣ Lấy tin nhắn theo ChatRoom + Sender
-        // ==========================
-        [HttpGet("chatroom/{chatRoomId}/sender/{senderId}")]
-        public async Task<IActionResult> GetMessagesByChatRoomAndSender(long chatRoomId, long senderId)
+        // ===================================
+        // ✉️ 2. Gửi tin nhắn TEXT
+        // ===================================
+        [HttpPost("text")]
+        public async Task<IActionResult> CreateTextMessage([FromBody] MessageCreateTextRequest request)
         {
-            var messages = await _messageService.GetMessagesByChatRoomAndSenderAsync(chatRoomId, senderId);
-            return Ok(messages);
+            // Lấy SenderId từ token, KHÔNG BAO GIỜ tin tưởng client
+            var senderId = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var message = new Message
+            {
+                ChatRoomId = request.ChatRoomId,
+                Content = request.Content,
+                SenderId = senderId, // ⬅️ ID an toàn từ token
+                MessageType = "text",
+                SentAt = DateTimeOffset.UtcNow
+            };
+
+            await _messageService.AddAsync(message);
+
+            // TODO: Dùng SignalR để broadcast tin nhắn này tới các client
+            // await _chatHubContext.Clients.Group(request.ChatRoomId.ToString())
+            //    .SendAsync("ReceiveMessage", _mapper.Map<MessageResponse>(message));
+
+            var response = _mapper.Map<MessageResponse>(message);
+            return Ok(response); // Trả về tin nhắn đã tạo
+        }
+
+        // ===================================
+        // 📎 3. Gửi tin nhắn FILE/ẢNH
+        // ===================================
+        [HttpPost("file")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> CreateFileMessage([FromForm] MessageCreateFileRequest request)
+        {
+            var senderId = long.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // TODO: Thêm logic lưu file
+            // 1. Gọi _fileService.SaveFileAsync(request.File)
+            // 2. Nhận lại fileUrl
+            var fileUrl = "https://your-storage.com/path-to-file.jpg"; // Giả sử
+
+            var message = new Message
+            {
+                ChatRoomId = request.ChatRoomId,
+                Content = request.Content, // Caption (nếu có)
+                SenderId = senderId,
+                MessageType = request.File.ContentType.StartsWith("image") ? "image" : "file",
+                FileUrl = fileUrl,
+                SentAt = DateTimeOffset.UtcNow
+            };
+
+            await _messageService.AddAsync(message);
+
+            // TODO: Dùng SignalR để broadcast
+
+            var response = _mapper.Map<MessageResponse>(message);
+            return Ok(response);
         }
     }
 }
