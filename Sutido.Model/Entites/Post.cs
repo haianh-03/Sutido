@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Sutido.Model.Enums;
 
 namespace Sutido.Model.Entites;
 
@@ -9,7 +8,7 @@ public partial class Post
 
     public long CreatorUserId { get; set; }
 
-    public string PostType { get; set; } = null!;
+    public PostType PostType { get; set; }
 
     public string Title { get; set; } = null!;
 
@@ -27,11 +26,13 @@ public partial class Post
 
     public decimal? PricePerSession { get; set; }
 
-    public string? Location { get; set; }
+    public string Location { get; set; } = null!;
 
-    public bool IsPublished { get; set; }
+    public bool IsPublished { get; set; } = true;
 
-    public DateTimeOffset CreatedAt { get; set; }
+    public bool IsActive { get; set; } = true;
+
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
     public DateTimeOffset? UpdatedAt { get; set; }
 

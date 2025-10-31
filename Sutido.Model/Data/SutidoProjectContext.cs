@@ -263,7 +263,9 @@ public partial class SutidoProjectContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(sysutcdatetime())");
             entity.Property(e => e.IsPublished).HasDefaultValue(true);
             entity.Property(e => e.Location).HasMaxLength(255);
-            entity.Property(e => e.PostType).HasMaxLength(50);
+            entity.Property(e => e.PostType)
+                .HasConversion<string>()
+                .HasMaxLength(50);
             entity.Property(e => e.PreferredDays).HasMaxLength(200);
             entity.Property(e => e.PreferredTime).HasMaxLength(100);
             entity.Property(e => e.PricePerSession).HasColumnType("decimal(18, 2)");

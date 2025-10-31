@@ -1,0 +1,47 @@
+﻿version: "3.9"
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sutido_sql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "DockerSql@123"
+      MSSQL_PID: "Developer"
+    command: ["/opt/mssql/bin/sqlservr", "--accept-eula"]
+    ports:
+      - "14330:1433" # đổi host port để tránh trùng với LocalDB
+    restart: unless-stopped
+    networks:
+      - app-network
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/14330'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      dockerfile: Sutido.API/Dockerfile
+    container_name: sutido_api
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=SutidoProject;User Id=sa;Password=DockerSql@123;TrustServerCertificate=True"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mssql-data: {}
