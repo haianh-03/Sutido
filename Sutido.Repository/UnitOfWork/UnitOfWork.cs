@@ -1,15 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Sutido.Model;
-using Sutido.Repository.Implementations;
-using Sutido.Repository.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Sutido.Model.Data;
-using Sutido.Model.Entites;
-using Sutido.Repository.Generic;
+﻿using Sutido.Model.Data;
 using Sutido.Repository.Interfaces;
 
 namespace Sutido.Repository.UnitOfWork
@@ -26,6 +15,7 @@ namespace Sutido.Repository.UnitOfWork
         public IUserRepo Users { get; }
         public ITutorProfileRepo TutorProfiles { get; }
         public ICertificationRepo Certifications { get; }
+        public IPostRepository Posts { get; }
 
         public UnitOfWork(SutidoProjectContext context,
             IUserRepo iUserRepo,
@@ -35,7 +25,8 @@ namespace Sutido.Repository.UnitOfWork
             IChatRoomRepository iChatRoomRepo,
             IMessageRepository iMessageRepo,
             IReviewRepository iReviewRepo,
-            ITrackingRepository iTrackingRepo)
+            ITrackingRepository iTrackingRepo,
+            IPostRepository posts)
         {
             _context = context;
 
@@ -47,6 +38,7 @@ namespace Sutido.Repository.UnitOfWork
             Messages = iMessageRepo;
             Reviews = iReviewRepo;
             Trackings = iTrackingRepo;
+            Posts = posts;
         }
 
         public async Task<int> SaveAsync() => await _context.SaveChangesAsync();

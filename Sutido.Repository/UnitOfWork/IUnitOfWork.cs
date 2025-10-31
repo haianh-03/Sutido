@@ -9,6 +9,7 @@ namespace Sutido.Repository.UnitOfWork
         IMessageRepository Messages { get; }
         IReviewRepository Reviews { get; }
         ITrackingRepository Trackings { get; }
+        IPostRepository Posts { get; }
 
         public IUserRepo Users { get; }
         public ITutorProfileRepo TutorProfiles { get; }

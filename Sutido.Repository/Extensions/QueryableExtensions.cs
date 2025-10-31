@@ -1,4 +1,5 @@
-﻿using System.Linq.Dynamic.Core;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
 
 namespace PRN232.Lab2.CoffeeStore.Repositories.Extensions
 {
@@ -60,11 +61,23 @@ namespace PRN232.Lab2.CoffeeStore.Repositories.Extensions
             if (filters == null || filters.Count == 0)
                 return query;
 
+            //foreach (var filter in filters)
+            //{
+            //    var field = filter.Key;
+            //    var value = filter.Value;
+            //    query = query.Where($"{field} == @0", value);
+            //}
+
             foreach (var filter in filters)
             {
-                var field = filter.Key;
-                var value = filter.Value;
-                query = query.Where($"{field} == @0", value);
+                if (string.IsNullOrEmpty(filter.Value))
+                    continue; // bỏ qua filter null hoặc rỗng
+
+                var property = typeof(T).GetProperty(filter.Key);
+                if (property == null)
+                    continue; // bỏ qua nếu không tồn tại property trong entity
+
+                query = query.Where(e => EF.Property<string>(e, filter.Key).Contains(filter.Value));
             }
             return query;
         }

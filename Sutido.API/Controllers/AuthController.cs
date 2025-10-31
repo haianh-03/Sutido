@@ -26,6 +26,13 @@ namespace Sutido.API.Controllers
             if (c.Password != c.ConfirmPassword)
                 return BadRequest("Passwords do not match.");
 
+            var today = DateTime.Today;
+            var dob = c.DateOfBirth.Date;
+            var age = today.Year - dob.Year;
+            if (dob > today.AddYears(-age)) age--;
+            if (age < 18)
+                return BadRequest("User must be at least 18 years old to register.");
+
             var user = _iMapper.Map<User>(c);
             user.PasswordHash = c.Password;
 

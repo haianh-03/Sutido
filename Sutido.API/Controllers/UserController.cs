@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Sutido.API.ViewModels.Requests;
 using Sutido.API.ViewModels.Responses;
@@ -81,7 +80,7 @@ namespace Sutido.API.Controllers
 
         // Update profile
         [HttpPut("{id}")]
-        public  async Task<IActionResult> UpdateProfileAsync(long id, [FromBody] ProfileRequest profile)
+        public async Task<IActionResult> UpdateProfileAsync(long id, [FromBody] ProfileRequest profile)
         {
             var user = _iMapper.Map<User>(profile);
 

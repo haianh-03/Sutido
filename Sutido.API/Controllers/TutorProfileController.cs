@@ -61,7 +61,7 @@ namespace Sutido.API.Controllers
         {
             var filters = new Dictionary<string, string>();
             if (status != null)
-                filters.Add("status", status.ToString() ?? "");
+                filters.Add("Status", status.ToString() ?? "");
             if (edu != null)
                 filters.Add("Education", edu.ToString() ?? "");
             var list = await _iService.GetAllAsync(sortBy, sortOrder, page, pageSize, filters);
