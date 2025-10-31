@@ -31,7 +31,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
       ConnectionStrings__DefaultConnection: "Server=sqlserver,1433;Database=SutidoProject;User Id=sa;Password=DockerSql@123;TrustServerCertificate=True"
     depends_on:
       sqlserver:
